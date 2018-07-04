@@ -98,8 +98,6 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                             /*
                             * In username token scenario, if user sends the digested password, callback handler needs to provide plain text password.
                             * We get plain text password through UserCredentialRetriever interface, which is implemented by custom user store managers.
-                            * we expect username with domain name if user resides in a secondary user store, eg, WSO2.Test/fooUser.
-                            * Additionally, secondary user stores needs to implement UserCredentialRetriever interface too
                             */
 
                             UserCredentialRetriever userCredentialRetriever;
