@@ -66,9 +66,9 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                 }
             }
 
-            for (int i = 0; i < callbacks.length; i++) {
-                if (callbacks[i] instanceof WSPasswordCallback) {
-                    WSPasswordCallback passwordCallback = (WSPasswordCallback) callbacks[i];
+            for (Callback callback : callbacks) {
+                if (callback instanceof WSPasswordCallback) {
+                    WSPasswordCallback passwordCallback = (WSPasswordCallback) callback;
 
                     String username = passwordCallback.getIdentifer();
                     String receivedPasswd = null;
@@ -84,10 +84,10 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                         && this.authenticateUser(username, receivedPasswd)) {
                                     isAuthenticated = true;
                                 } else {
-                                    throw new UnsupportedCallbackException(callbacks[i], "check failed");
+                                    throw new UnsupportedCallbackException(callback, "check failed");
                                 }
                             } catch (Exception e) {
-                                throw new UnsupportedCallbackException(callbacks[i],
+                                throw new UnsupportedCallbackException(callback,
                                         "Check failed : System error");
                             }
 
@@ -119,11 +119,10 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                         if (log.isDebugEnabled()) {
                                             log.debug("User is not authorized!");
                                         }
-                                        throw new UnsupportedCallbackException(callbacks[i], "check failed");
+                                        throw new UnsupportedCallbackException(callback, "check failed");
                                     }
                                 } catch (Exception e) {
-                                    throw new UnsupportedCallbackException(callbacks[i],
-                                            "Check failed : System error");
+                                    throw new UnsupportedCallbackException(callback, "Check failed : System error");
                                 }
                                 passwordCallback.setPassword(storedPassword);
                                 break;
@@ -146,7 +145,7 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                         return;
                     }
                 } else {
-                    throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+                    throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
                 }
             }
         } catch (UnsupportedCallbackException | IOException e) {
