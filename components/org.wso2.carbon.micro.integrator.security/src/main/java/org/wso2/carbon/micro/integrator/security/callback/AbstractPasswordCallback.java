@@ -182,18 +182,18 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                 constructor = clazz.getConstructor(initClassOpt1);
                 newObject = constructor.newInstance(initObjOpt1);
                 return newObject;
-            } catch (NoSuchMethodException var17) {
+            } catch (NoSuchMethodException e) {
                 if (log.isDebugEnabled()) {
                     log.debug("Cannont initialize " + className);
                 }
-                throw new UserStoreException(var17.getMessage(), var17);
+                throw new UserStoreException(e.getMessage(), e);
             }
-        } catch (Throwable var18) {
+        } catch (Throwable e) {
             if (log.isDebugEnabled()) {
-                log.debug("Cannot create " + className, var18);
+                log.debug("Cannot create " + className, e);
             }
 
-            throw new UserStoreException(var18.getMessage() + "Type " + var18.getClass(), var18);
+            throw new UserStoreException(e.getMessage() + "Type " + e.getClass(), e);
         }
     }
 
