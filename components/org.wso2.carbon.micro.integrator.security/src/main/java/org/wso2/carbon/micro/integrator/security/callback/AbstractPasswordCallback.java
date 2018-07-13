@@ -90,15 +90,14 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                 throw new UnsupportedCallbackException(callback,
                                         "Check failed : System error");
                             }
-
                             break;
 
                         case WSPasswordCallback.USERNAME_TOKEN:
 
                             /*
-                            * In username token scenario, if user sends the digested password, callback handler needs to provide plain text password.
-                            * We get plain text password through UserCredentialRetriever interface, which is implemented by custom user store managers.
-                            */
+                             * In username token scenario, if user sends the digested password, callback handler needs to provide plain text password.
+                             * We get plain text password through UserCredentialRetriever interface, which is implemented by custom user store managers.
+                             */
 
                             UserCredentialRetriever userCredentialRetriever;
                             String storedPassword = null;

@@ -43,20 +43,23 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 public class RealmConfigXMLProcessor {
+
     public static final String REALM_CONFIG_FILE = "user-mgt.xml";
     private static final Log log = LogFactory.getLog(RealmConfigXMLProcessor.class);
     InputStream inStream = null;
     private SecretResolver secretResolver;
 
     public RealmConfigXMLProcessor() {
+
     }
 
     public static OMElement serialize(RealmConfiguration realmConfig) {
+
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement rootElement = factory.createOMElement(new QName("UserManager"));
         OMElement realmElement = factory.createOMElement(new QName("Realm"));
         String realmName = realmConfig.getRealmClassName();
-        OMAttribute propAttr = factory.createOMAttribute("name", (OMNamespace)null, realmName);
+        OMAttribute propAttr = factory.createOMAttribute("name", (OMNamespace) null, realmName);
         realmElement.addAttribute(propAttr);
         rootElement.addChild(realmElement);
         OMElement mainConfig = factory.createOMElement(new QName("Configuration"));
@@ -86,7 +89,7 @@ public class RealmConfigXMLProcessor {
         OMElement everyoneRoleNameElem = factory.createOMElement(new QName("EveryOneRoleName"));
         everyoneRoleNameElem.setText(UserCoreUtil.removeDomainFromName(realmConfig.getEveryOneRoleName()));
         mainConfig.addChild(everyoneRoleNameElem);
-        addPropertyElements(factory, mainConfig, (String)null, realmConfig.getDescription(), realmConfig.getRealmProperties());
+        addPropertyElements(factory, mainConfig, (String) null, realmConfig.getDescription(), realmConfig.getRealmProperties());
         OMElement userStoreManagerElement = factory.createOMElement(new QName("UserStoreManager"));
         realmElement.addChild(userStoreManagerElement);
         addPropertyElements(factory, userStoreManagerElement, realmConfig.getUserStoreClass(), realmConfig.getDescription(), realmConfig.getUserStoreProperties());
@@ -95,22 +98,23 @@ public class RealmConfigXMLProcessor {
     }
 
     private static void addPropertyElements(OMFactory factory, OMElement parent, String className, String description, Map<String, String> properties) {
+
         if (className != null) {
-            parent.addAttribute("class", className, (OMNamespace)null);
+            parent.addAttribute("class", className, (OMNamespace) null);
         }
 
         if (description != null) {
-            parent.addAttribute("Description", description, (OMNamespace)null);
+            parent.addAttribute("Description", description, (OMNamespace) null);
         }
 
         Iterator ite = properties.entrySet().iterator();
 
-        while(ite.hasNext()) {
-            Entry<String, String> entry = (Entry)ite.next();
-            String name = (String)entry.getKey();
-            String value = (String)entry.getValue();
+        while (ite.hasNext()) {
+            Entry<String, String> entry = (Entry) ite.next();
+            String name = (String) entry.getKey();
+            String value = (String) entry.getValue();
             OMElement propElem = factory.createOMElement(new QName("Property"));
-            OMAttribute propAttr = factory.createOMAttribute("name", (OMNamespace)null, name);
+            OMAttribute propAttr = factory.createOMAttribute("name", (OMNamespace) null, name);
             propElem.addAttribute(propAttr);
             propElem.setText(value);
             parent.addChild(propElem);
@@ -119,6 +123,7 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfigurationFromFile() throws UserStoreException {
+
         try {
             OMElement realmElement = this.getRealmElement();
             RealmConfiguration realmConfig = this.buildRealmConfiguration(realmElement);
@@ -138,6 +143,7 @@ public class RealmConfigXMLProcessor {
     }
 
     private OMElement preProcessRealmConfig(InputStream inStream) throws CarbonException, XMLStreamException {
+
         inStream = CarbonUtils.replaceSystemVariablesInXml(inStream);
         StAXOMBuilder builder = new StAXOMBuilder(inStream);
         OMElement documentElement = builder.getDocumentElement();
@@ -146,6 +152,7 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfiguration(InputStream inStream) throws UserStoreException {
+
         String message;
         try {
             OMElement realmElement = this.preProcessRealmConfig(inStream);
@@ -173,10 +180,12 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfiguration(OMElement realmElem) throws UserStoreException {
+
         return this.buildRealmConfiguration(realmElem, true);
     }
 
     public RealmConfiguration buildRealmConfiguration(OMElement realmElem, boolean supperTenant) throws UserStoreException {
+
         RealmConfiguration realmConfig = null;
         String userStoreClass = null;
         String addAdmin = null;
@@ -192,7 +201,7 @@ public class RealmConfigXMLProcessor {
         realmClass = realmElem.getAttributeValue(new QName("class"));
         OMElement mainConfig = realmElem.getFirstChildWithName(new QName("Configuration"));
         realmProperties = this.getChildPropertyElements(mainConfig, this.secretResolver);
-        String dbUrl = this.constructDatabaseURL((String)realmProperties.get("url"));
+        String dbUrl = this.constructDatabaseURL((String) realmProperties.get("url"));
         realmProperties.put("url", dbUrl);
         if (mainConfig.getFirstChildWithName(new QName("AddAdmin")) != null && !mainConfig.getFirstChildWithName(new QName("AddAdmin")).getText().trim().equals("")) {
             addAdmin = mainConfig.getFirstChildWithName(new QName("AddAdmin")).getText().trim();
@@ -243,15 +252,15 @@ public class RealmConfigXMLProcessor {
 
         String readOnly;
         String adminRoleDomain;
-        while(iterator.hasNext()) {
-            OMElement usaConfig = (OMElement)iterator.next();
+        while (iterator.hasNext()) {
+            OMElement usaConfig = (OMElement) iterator.next();
             userStoreClass = usaConfig.getAttributeValue(new QName("class"));
             if (usaConfig.getFirstChildWithName(new QName("Description")) != null) {
                 description = usaConfig.getFirstChildWithName(new QName("Description")).getText().trim();
             }
 
             userStoreProperties = this.getChildPropertyElements(usaConfig, this.secretResolver);
-            readOnly = (String)userStoreProperties.get("PasswordsExternallyManaged");
+            readOnly = (String) userStoreProperties.get("PasswordsExternallyManaged");
             Map<String, String> multipleCredentialsProperties = this.getMultipleCredentialsProperties(usaConfig);
             if (null != readOnly && !readOnly.trim().equals("")) {
                 passwordsExternallyManaged = Boolean.parseBoolean(readOnly);
@@ -267,23 +276,23 @@ public class RealmConfigXMLProcessor {
                 realmConfig.setPrimary(true);
                 realmConfig.setAddAdmin(addAdmin);
                 realmConfig.setAdminPassword(adminPassword);
-                adminRoleDomain = (String)userStoreProperties.get("DomainName");
+                adminRoleDomain = (String) userStoreProperties.get("DomainName");
                 if (adminRoleDomain == null) {
                     userStoreProperties.put("DomainName", "PRIMARY");
                 }
 
                 int i;
-                for(i = 0; i < reservedRoles.length; ++i) {
+                for (i = 0; i < reservedRoles.length; ++i) {
                     realmConfig.addReservedRoleName(reservedRoles[i].trim().toUpperCase());
                 }
 
-                for(i = 0; i < restrictedDomains.length; ++i) {
+                for (i = 0; i < restrictedDomains.length; ++i) {
                     realmConfig.addRestrictedDomainForSelfSignUp(restrictedDomains[i].trim().toUpperCase());
                 }
 
             }
 
-            adminRoleDomain = (String)userStoreProperties.get("DomainName");
+            adminRoleDomain = (String) userStoreProperties.get("DomainName");
             if (adminRoleDomain == null) {
                 log.warn("Required property DomainName missing in secondary user store. Skip adding the user store.");
             } else {
@@ -346,6 +355,7 @@ public class RealmConfigXMLProcessor {
     }
 
     private String constructDatabaseURL(String url) {
+
         if (url != null && url.contains("${carbon.home}")) {
             File carbonHomeDir = new File(CarbonUtils.getCarbonHome());
             String path = carbonHomeDir.getPath();
@@ -358,7 +368,7 @@ public class RealmConfigXMLProcessor {
                 String dbUrl = tempStrings1[1];
                 String[] tempStrings2 = dbUrl.split("/");
 
-                for(int i = 0; i < tempStrings2.length - 1; ++i) {
+                for (int i = 0; i < tempStrings2.length - 1; ++i) {
                     url = tempStrings1[0] + tempStrings2[i] + "/";
                 }
 
@@ -370,12 +380,13 @@ public class RealmConfigXMLProcessor {
     }
 
     private Map<String, String> getChildPropertyElements(OMElement omElement, SecretResolver secretResolver) {
+
         Map<String, String> map = new HashMap();
 
         String propName;
         String propValue;
-        for(Iterator ite = omElement.getChildrenWithName(new QName("Property")); ite.hasNext(); map.put(propName.trim(), propValue.trim())) {
-            OMElement propElem = (OMElement)ite.next();
+        for (Iterator ite = omElement.getChildrenWithName(new QName("Property")); ite.hasNext(); map.put(propName.trim(), propValue.trim())) {
+            OMElement propElem = (OMElement) ite.next();
             propName = propElem.getAttributeValue(new QName("name"));
             propValue = propElem.getText();
             if (secretResolver != null && secretResolver.isInitialized()) {
@@ -393,15 +404,16 @@ public class RealmConfigXMLProcessor {
     }
 
     private Map<String, String> getMultipleCredentialsProperties(OMElement omElement) {
+
         Map<String, String> map = new HashMap();
         OMElement multipleCredentialsEl = omElement.getFirstChildWithName(new QName("MultipleCredentials"));
         if (multipleCredentialsEl != null) {
             Iterator ite = multipleCredentialsEl.getChildrenWithLocalName("Credential");
 
-            while(ite.hasNext()) {
+            while (ite.hasNext()) {
                 Object OMObj = ite.next();
                 if (OMObj instanceof OMElement) {
-                    OMElement credsElem = (OMElement)OMObj;
+                    OMElement credsElem = (OMElement) OMObj;
                     String credsType = credsElem.getAttributeValue(new QName("type"));
                     String credsClassName = credsElem.getText();
                     map.put(credsType.trim(), credsClassName.trim());
@@ -413,15 +425,16 @@ public class RealmConfigXMLProcessor {
     }
 
     private OMElement getRealmElement() throws XMLStreamException, IOException, UserStoreException {
+
         String carbonHome = CarbonUtils.getCarbonHome();
         StAXOMBuilder builder = null;
         if (carbonHome != null) {
-            File profileConfigXml = new File(CarbonUtils.getCarbonConfigDirPath(), "user-mgt.xml");
+            File profileConfigXml = new File(CarbonUtils.getCarbonConfigDirPath(), REALM_CONFIG_FILE);
             if (profileConfigXml.exists()) {
                 this.inStream = new FileInputStream(profileConfigXml);
             }
         } else {
-            this.inStream = RealmConfigXMLProcessor.class.getResourceAsStream("user-mgt.xml");
+            this.inStream = RealmConfigXMLProcessor.class.getResourceAsStream(REALM_CONFIG_FILE);
         }
 
         String warningMessage = "";
@@ -458,6 +471,7 @@ public class RealmConfigXMLProcessor {
     }
 
     public void setSecretResolver(OMElement rootElement) {
+
         this.secretResolver = SecretResolverFactory.create(rootElement, true);
     }
 }

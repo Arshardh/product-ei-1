@@ -26,7 +26,7 @@ public class DataHolder {
     private RealmConfiguration realmConfig;
     private UserStoreManager userStoreManager;
 
-    public static DataHolder instance = new DataHolder();
+    public final static DataHolder instance = new DataHolder();
 
     public static DataHolder getInstance() {
         return instance;

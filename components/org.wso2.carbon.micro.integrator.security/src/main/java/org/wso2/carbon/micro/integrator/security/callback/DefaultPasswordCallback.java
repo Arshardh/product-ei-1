@@ -24,11 +24,12 @@ import org.wso2.carbon.user.core.UserStoreException;
 public class DefaultPasswordCallback extends AbstractPasswordCallback {
 
     @Override
-    public RealmConfiguration getRealmConfig(){
+    public RealmConfiguration getRealmConfig() {
+
         RealmConfigXMLProcessor processor = new RealmConfigXMLProcessor();
         RealmConfiguration realmConfig = null;
         try {
-            realmConfig  = processor.buildRealmConfigurationFromFile();
+            realmConfig = processor.buildRealmConfigurationFromFile();
 
         } catch (UserStoreException e) {
             log.error("Error while loading Realm Configuration");

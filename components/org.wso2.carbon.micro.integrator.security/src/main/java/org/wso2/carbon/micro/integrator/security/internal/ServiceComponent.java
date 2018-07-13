@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.micro.integrator.security.internal;
 
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.description.Parameter;
@@ -31,7 +30,6 @@ import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.ConfigurationContextService;
-
 
 /**
  * @scr.component name="micro.server.security"" immediate="true"
@@ -46,6 +44,7 @@ public class ServiceComponent {
     private ConfigurationContext configCtx;
 
     protected void activate(ComponentContext ctxt) {
+
         try {
             setSecurityParams();
         } catch (Throwable e) {
@@ -54,6 +53,7 @@ public class ServiceComponent {
     }
 
     private void setSecurityParams() {
+
         AxisConfiguration axisConfig = this.configCtx.getAxisConfiguration();
 
         Parameter passwordCallbackParam = new Parameter();
@@ -73,7 +73,7 @@ public class ServiceComponent {
         dataHolder.setRealmConfig(config);
 
         try {
-            UserStoreManager userStoreManager = (UserStoreManager)passwordCallbackClass.createObjectWithOptions(config.getUserStoreClass(), config);
+            UserStoreManager userStoreManager = (UserStoreManager) passwordCallbackClass.createObjectWithOptions(config.getUserStoreClass(), config);
             dataHolder.setUserStoreManager(userStoreManager);
         } catch (UserStoreException e) {
             log.error("Error on initializing User Store Manager Class", e);
@@ -81,14 +81,17 @@ public class ServiceComponent {
     }
 
     protected void deactivate(ComponentContext ctxt) {
+
         log.debug("Micro Integrator Security bundle is deactivated ");
     }
 
     protected void setConfigurationContext(ConfigurationContextService configCtx) {
+
         this.configCtx = configCtx.getServerConfigContext();
     }
 
     protected void unsetConfigurationContext(ConfigurationContextService configCtx) {
+
         this.configCtx = null;
     }
 }
