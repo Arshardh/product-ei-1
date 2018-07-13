@@ -22,7 +22,6 @@ import org.apache.axiom.om.*;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -46,15 +45,10 @@ import java.util.regex.Pattern;
 public class RealmConfigXMLProcessor {
     public static final String REALM_CONFIG_FILE = "user-mgt.xml";
     private static final Log log = LogFactory.getLog(RealmConfigXMLProcessor.class);
-    private static BundleContext bundleContext;
     InputStream inStream = null;
     private SecretResolver secretResolver;
 
     public RealmConfigXMLProcessor() {
-    }
-
-    public static void setBundleContext(BundleContext bundleContext) {
-        bundleContext = bundleContext;
     }
 
     public static OMElement serialize(RealmConfiguration realmConfig) {
@@ -433,13 +427,7 @@ public class RealmConfigXMLProcessor {
         String warningMessage = "";
         if (this.inStream == null) {
             URL url;
-            if (bundleContext != null) {
-                if ((url = bundleContext.getBundle().getResource("user-mgt.xml")) != null) {
-                    this.inStream = url.openStream();
-                } else {
-                    warningMessage = "Bundle context could not find resource user-mgt.xml or user does not have sufficient permission to access the resource.";
-                }
-            } else if ((url = ClaimBuilder.class.getResource("user-mgt.xml")) != null) {
+            if ((url = ClaimBuilder.class.getResource(REALM_CONFIG_FILE)) != null) {
                 this.inStream = url.openStream();
                 log.error("Using the internal realm configuration. Strictly for non-production purposes.");
             } else {
