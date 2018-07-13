@@ -44,7 +44,6 @@ public class ServiceComponent {
     private ConfigurationContext configCtx;
 
     protected void activate(ComponentContext ctxt) {
-
         try {
             setSecurityParams();
         } catch (Throwable e) {
@@ -53,7 +52,6 @@ public class ServiceComponent {
     }
 
     private void setSecurityParams() {
-
         AxisConfiguration axisConfig = this.configCtx.getAxisConfiguration();
 
         Parameter passwordCallbackParam = new Parameter();
@@ -81,17 +79,14 @@ public class ServiceComponent {
     }
 
     protected void deactivate(ComponentContext ctxt) {
-
         log.debug("Micro Integrator Security bundle is deactivated ");
     }
 
     protected void setConfigurationContext(ConfigurationContextService configCtx) {
-
         this.configCtx = configCtx.getServerConfigContext();
     }
 
     protected void unsetConfigurationContext(ConfigurationContextService configCtx) {
-
         this.configCtx = null;
     }
 }

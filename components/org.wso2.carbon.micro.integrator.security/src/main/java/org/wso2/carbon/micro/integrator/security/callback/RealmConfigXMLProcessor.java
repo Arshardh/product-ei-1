@@ -54,7 +54,6 @@ public class RealmConfigXMLProcessor {
     }
 
     public static OMElement serialize(RealmConfiguration realmConfig) {
-
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement rootElement = factory.createOMElement(new QName("UserManager"));
         OMElement realmElement = factory.createOMElement(new QName("Realm"));
@@ -98,7 +97,6 @@ public class RealmConfigXMLProcessor {
     }
 
     private static void addPropertyElements(OMFactory factory, OMElement parent, String className, String description, Map<String, String> properties) {
-
         if (className != null) {
             parent.addAttribute("class", className, (OMNamespace) null);
         }
@@ -123,7 +121,6 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfigurationFromFile() throws UserStoreException {
-
         try {
             OMElement realmElement = this.getRealmElement();
             RealmConfiguration realmConfig = this.buildRealmConfiguration(realmElement);
@@ -143,7 +140,6 @@ public class RealmConfigXMLProcessor {
     }
 
     private OMElement preProcessRealmConfig(InputStream inStream) throws CarbonException, XMLStreamException {
-
         inStream = CarbonUtils.replaceSystemVariablesInXml(inStream);
         StAXOMBuilder builder = new StAXOMBuilder(inStream);
         OMElement documentElement = builder.getDocumentElement();
@@ -152,7 +148,6 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfiguration(InputStream inStream) throws UserStoreException {
-
         String message;
         try {
             OMElement realmElement = this.preProcessRealmConfig(inStream);
@@ -180,12 +175,10 @@ public class RealmConfigXMLProcessor {
     }
 
     public RealmConfiguration buildRealmConfiguration(OMElement realmElem) throws UserStoreException {
-
         return this.buildRealmConfiguration(realmElem, true);
     }
 
     public RealmConfiguration buildRealmConfiguration(OMElement realmElem, boolean supperTenant) throws UserStoreException {
-
         RealmConfiguration realmConfig = null;
         String userStoreClass = null;
         String addAdmin = null;
@@ -355,7 +348,6 @@ public class RealmConfigXMLProcessor {
     }
 
     private String constructDatabaseURL(String url) {
-
         if (url != null && url.contains("${carbon.home}")) {
             File carbonHomeDir = new File(CarbonUtils.getCarbonHome());
             String path = carbonHomeDir.getPath();
@@ -380,9 +372,7 @@ public class RealmConfigXMLProcessor {
     }
 
     private Map<String, String> getChildPropertyElements(OMElement omElement, SecretResolver secretResolver) {
-
         Map<String, String> map = new HashMap();
-
         String propName;
         String propValue;
         for (Iterator ite = omElement.getChildrenWithName(new QName("Property")); ite.hasNext(); map.put(propName.trim(), propValue.trim())) {
@@ -404,7 +394,6 @@ public class RealmConfigXMLProcessor {
     }
 
     private Map<String, String> getMultipleCredentialsProperties(OMElement omElement) {
-
         Map<String, String> map = new HashMap();
         OMElement multipleCredentialsEl = omElement.getFirstChildWithName(new QName("MultipleCredentials"));
         if (multipleCredentialsEl != null) {
@@ -425,7 +414,6 @@ public class RealmConfigXMLProcessor {
     }
 
     private OMElement getRealmElement() throws XMLStreamException, IOException, UserStoreException {
-
         String carbonHome = CarbonUtils.getCarbonHome();
         StAXOMBuilder builder = null;
         if (carbonHome != null) {
@@ -471,7 +459,6 @@ public class RealmConfigXMLProcessor {
     }
 
     public void setSecretResolver(OMElement rootElement) {
-
         this.secretResolver = SecretResolverFactory.create(rootElement, true);
     }
 }

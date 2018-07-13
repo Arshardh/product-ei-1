@@ -43,29 +43,24 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
 
     private UserStoreManager userStoreManager;
     private RealmConfiguration realmConfig;
-
     private DataHolder dataHolder = DataHolder.getInstance();
 
     @Override
     public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-
         try {
             boolean isAuthenticated = false;
-
             if (realmConfig == null) {
                 realmConfig = dataHolder.getRealmConfig();
                 if (realmConfig == null) {
                     realmConfig = getRealmConfig();
                 }
             }
-
             if (userStoreManager == null) {
                 userStoreManager = dataHolder.getUserStoreManager();
                 if (userStoreManager == null) {
                     userStoreManager = (UserStoreManager) createObjectWithOptions(realmConfig.getUserStoreClass(), realmConfig);
                 }
             }
-
             for (Callback callback : callbacks) {
                 if (callback instanceof WSPasswordCallback) {
                     WSPasswordCallback passwordCallback = (WSPasswordCallback) callback;
@@ -164,10 +159,8 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
     }
 
     public Object createObjectWithOptions(String className, RealmConfiguration realmConfig) throws UserStoreException {
-
         Class[] initClassOpt1 = new Class[]{RealmConfiguration.class, ClaimManager.class, ProfileConfigurationManager.class};
         Object[] initObjOpt1 = new Object[]{realmConfig, null, null};
-
         try {
             Class clazz = Class.forName(className);
             Object newObject = null;
@@ -196,11 +189,8 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
     }
 
     private boolean authenticateUser(String user, String password) throws Exception {
-
         boolean isAuthenticated = false;
-
         String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
-
         try {
             isAuthenticated = userStoreManager.authenticate(
                     tenantAwareUserName, password);

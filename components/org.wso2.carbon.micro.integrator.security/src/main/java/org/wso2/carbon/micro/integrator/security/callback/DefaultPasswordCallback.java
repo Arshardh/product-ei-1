@@ -25,7 +25,6 @@ public class DefaultPasswordCallback extends AbstractPasswordCallback {
 
     @Override
     public RealmConfiguration getRealmConfig() {
-
         RealmConfigXMLProcessor processor = new RealmConfigXMLProcessor();
         RealmConfiguration realmConfig = null;
         try {
