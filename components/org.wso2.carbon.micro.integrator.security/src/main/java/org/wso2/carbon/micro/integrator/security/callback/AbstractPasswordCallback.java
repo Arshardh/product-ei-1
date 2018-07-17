@@ -27,7 +27,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.claim.ClaimManager;
 import org.wso2.carbon.user.core.profile.ProfileConfigurationManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -35,6 +34,9 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
+/**
+ * This class can be inherited to write a password callback handler, by implementing the getRealmConfig method
+ */
 public abstract class AbstractPasswordCallback implements CallbackHandler {
 
     protected final Log log = LogFactory.getLog(AbstractPasswordCallback.class);
@@ -82,8 +84,12 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                     throw new UnsupportedCallbackException(callback, "check failed");
                                 }
                             } catch (Exception e) {
-                                throw new UnsupportedCallbackException(callback,
-                                        "Check failed : System error");
+                                /*
+                                 * As the UnsupportedCallbackException does not accept the exception as a parameter,
+                                 * the stack trace is added to the error message.
+                                 *
+                                 */
+                                throw new UnsupportedCallbackException(callback, "Check failed : System error");
                             }
                             break;
 
@@ -100,22 +106,23 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                 userCredentialRetriever = (UserCredentialRetriever) userStoreManager;
                                 storedPassword = userCredentialRetriever.getPassword(username);
                             } else {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Can not set user password in callback because primary userstore class" +
+                                log.error("Can not set user password in callback because primary userstore class" +
                                             " has not implemented UserCredentialRetriever interface.");
-                                }
+
                             }
                             if (storedPassword != null) {
                                 try {
-                                    if (this.authenticateUser(username, storedPassword)) {
-                                        // do nothing things are fine
-                                    } else {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("User is not authorized!");
-                                        }
+                                    if (!this.authenticateUser(username, storedPassword)) {
+                                        log.error("User is not authorized!");
                                         throw new UnsupportedCallbackException(callback, "check failed");
                                     }
                                 } catch (Exception e) {
+                                    /*
+                                     * As the UnsupportedCallbackException does not accept the exception as a parameter,
+                                     * the stack trace is added to the error message.
+                                     *
+                                     */
+                                    //add stack trace to message
                                     throw new UnsupportedCallbackException(callback, "Check failed : System error");
                                 }
                                 passwordCallback.setPassword(storedPassword);
@@ -149,11 +156,20 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
             }
             throw e;
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
+            /*
+             * As the UnsupportedCallbackException does not accept the exception as a parameter,
+             * the stack trace is added to the error message.
+             *
+             */
             log.error("Error in handling PasswordCallbackHandler", e);
             throw new UnsupportedCallbackException(null, e.getMessage());
         } catch (Exception e) {
+            /*
+             * As the UnsupportedCallbackException does not accept the exception as a parameter,
+             * the stack trace is added to the error message.
+             *
+             */
             log.error("Error in handling PasswordCallbackHandler", e);
-            //can't build an unsupported exception.
             throw new UnsupportedCallbackException(null, e.getMessage());
         }
     }
@@ -189,11 +205,10 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
     }
 
     private boolean authenticateUser(String user, String password) throws Exception {
-        boolean isAuthenticated = false;
-        String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(user);
+        boolean isAuthenticated;
         try {
             isAuthenticated = userStoreManager.authenticate(
-                    tenantAwareUserName, password);
+                    user, password);
 
             // TODO - Handle Authorization of users, once they are authenticated
 

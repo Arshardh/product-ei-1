@@ -21,6 +21,10 @@ package org.wso2.carbon.micro.integrator.security.callback;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserStoreException;
 
+/**
+ * This is the default implementation of the AbstractPasswordCallbackHandler which loads the realm configuration from
+ * the user-mgt.xml file
+ */
 public class DefaultPasswordCallback extends AbstractPasswordCallback {
 
     @Override

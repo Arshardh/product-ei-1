@@ -21,6 +21,9 @@ package org.wso2.carbon.micro.integrator.security.internal;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreManager;
 
+/**
+ * Store the realm configuration and user store manager for the micro integrator security scenarios
+ */
 public class DataHolder {
 
     private RealmConfiguration realmConfig;

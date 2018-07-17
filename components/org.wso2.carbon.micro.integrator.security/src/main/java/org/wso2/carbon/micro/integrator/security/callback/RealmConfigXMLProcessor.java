@@ -26,7 +26,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.claim.builder.ClaimBuilder;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.securevault.SecretResolver;
@@ -35,13 +34,15 @@ import org.wso2.securevault.SecretResolverFactory;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+/**
+ * This class is responsible for loading the realm configuration from the user-mgt.xml file
+ */
 public class RealmConfigXMLProcessor {
 
     public static final String REALM_CONFIG_FILE = "user-mgt.xml";
@@ -420,24 +421,15 @@ public class RealmConfigXMLProcessor {
             File profileConfigXml = new File(CarbonUtils.getCarbonConfigDirPath(), REALM_CONFIG_FILE);
             if (profileConfigXml.exists()) {
                 this.inStream = new FileInputStream(profileConfigXml);
+            } else {
+                throw new FileNotFoundException(REALM_CONFIG_FILE + " not found at " + CarbonUtils.getCarbonConfigDirPath());
             }
         } else {
-            this.inStream = RealmConfigXMLProcessor.class.getResourceAsStream(REALM_CONFIG_FILE);
-        }
-
-        String warningMessage = "";
-        if (this.inStream == null) {
-            URL url;
-            if ((url = ClaimBuilder.class.getResource(REALM_CONFIG_FILE)) != null) {
-                this.inStream = url.openStream();
-                log.error("Using the internal realm configuration. Strictly for non-production purposes.");
-            } else {
-                warningMessage = "ClaimBuilder could not find resource user-mgt.xml or user does not have sufficient permission to access the resource.";
-            }
+            log.error("Carbon Home not defined");
         }
 
         if (this.inStream == null) {
-            String message = "Profile configuration not found. Cause - " + warningMessage;
+            String message = "Profile configuration not found.";
             if (log.isDebugEnabled()) {
                 log.debug(message);
             }
