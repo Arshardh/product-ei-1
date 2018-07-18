@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.micro.integrator.security.callback.DefaultPasswordCallback;
+import org.wso2.carbon.micro.integrator.security.MicroIntegratorSecurityUtils;
 import org.wso2.carbon.user.api.RealmConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -71,7 +72,8 @@ public class ServiceComponent {
         dataHolder.setRealmConfig(config);
 
         try {
-            UserStoreManager userStoreManager = (UserStoreManager) passwordCallbackClass.createObjectWithOptions(config.getUserStoreClass(), config);
+            UserStoreManager userStoreManager = (UserStoreManager) MicroIntegratorSecurityUtils.
+                    createObjectWithOptions(config.getUserStoreClass(), config);
             dataHolder.setUserStoreManager(userStoreManager);
         } catch (UserStoreException e) {
             log.error("Error on initializing User Store Manager Class", e);

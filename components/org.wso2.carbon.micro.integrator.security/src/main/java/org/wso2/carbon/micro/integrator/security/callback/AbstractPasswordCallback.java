@@ -21,28 +21,24 @@ package org.wso2.carbon.micro.integrator.security.callback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.ws.security.WSPasswordCallback;
+import org.wso2.carbon.micro.integrator.security.MicroIntegratorSecurityUtils;
 import org.wso2.carbon.micro.integrator.security.internal.DataHolder;
 import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
-import org.wso2.carbon.user.core.claim.ClaimManager;
-import org.wso2.carbon.user.core.profile.ProfileConfigurationManager;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 
 /**
- * This class can be inherited to write a password callback handler, by implementing the getRealmConfig method
+ * This class handles the authentication of the username token via the defined user store.
+ * This class can be inherited to write a password callback handler, by implementing the getRealmConfig method.
  */
 public abstract class AbstractPasswordCallback implements CallbackHandler {
 
     protected final Log log = LogFactory.getLog(AbstractPasswordCallback.class);
-
     public abstract RealmConfiguration getRealmConfig();
-
     private UserStoreManager userStoreManager;
     private RealmConfiguration realmConfig;
     private DataHolder dataHolder = DataHolder.getInstance();
@@ -60,7 +56,8 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
             if (userStoreManager == null) {
                 userStoreManager = dataHolder.getUserStoreManager();
                 if (userStoreManager == null) {
-                    userStoreManager = (UserStoreManager) createObjectWithOptions(realmConfig.getUserStoreClass(), realmConfig);
+                    userStoreManager = (UserStoreManager) MicroIntegratorSecurityUtils.
+                            createObjectWithOptions(realmConfig.getUserStoreClass(), realmConfig);
                 }
             }
             for (Callback callback : callbacks) {
@@ -89,15 +86,17 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                  * the stack trace is added to the error message.
                                  *
                                  */
-                                throw new UnsupportedCallbackException(callback, "Check failed : System error");
+                                throw new UnsupportedCallbackException(callback, "Check failed : System error\n" +
+                                        MicroIntegratorSecurityUtils.stackTraceToString(e.getStackTrace()));
                             }
                             break;
 
                         case WSPasswordCallback.USERNAME_TOKEN:
 
                             /*
-                             * In username token scenario, if user sends the digested password, callback handler needs to provide plain text password.
-                             * We get plain text password through UserCredentialRetriever interface, which is implemented by custom user store managers.
+                             * In username token scenario, if user sends the digested password, callback handler needs
+                             * to provide plain text password. We get plain text password through
+                             * UserCredentialRetriever interface, which is implemented by custom user store managers.
                              */
 
                             UserCredentialRetriever userCredentialRetriever;
@@ -107,7 +106,7 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                 storedPassword = userCredentialRetriever.getPassword(username);
                             } else {
                                 log.error("Can not set user password in callback because primary userstore class" +
-                                            " has not implemented UserCredentialRetriever interface.");
+                                        " has not implemented UserCredentialRetriever interface.");
 
                             }
                             if (storedPassword != null) {
@@ -122,8 +121,8 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                                      * the stack trace is added to the error message.
                                      *
                                      */
-                                    //add stack trace to message
-                                    throw new UnsupportedCallbackException(callback, "Check failed : System error");
+                                    throw new UnsupportedCallbackException(callback, "Check failed : System error\n" +
+                                            MicroIntegratorSecurityUtils.stackTraceToString(e.getStackTrace()));
                                 }
                                 passwordCallback.setPassword(storedPassword);
                                 break;
@@ -132,11 +131,9 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
                         default:
 
                             /*
-                             * When the password is null WS4J reports an error
-                             * saying no password available for the user. But its
-                             * better if we simply report authentication failure
-                             * Therefore setting the password to be the empty string
-                             * in this situation.
+                             * When the password is null WS4J reports an error saying no password available for the
+                             * user. But its better if we simply report authentication failure. Therefore setting the
+                             * password to be the empty string in this situation.
                              */
 
                             passwordCallback.setPassword(receivedPasswd);
@@ -151,64 +148,21 @@ public abstract class AbstractPasswordCallback implements CallbackHandler {
             }
         } catch (UnsupportedCallbackException | IOException e) {
             if (log.isDebugEnabled()) {
-                log.debug("Error in handling PasswordCallbackHandler", e); //logging invlaid passwords and attempts
+                //logging invlaid attempts
+                log.debug("Error in handling PasswordCallbackHandler", e);
                 throw e;
             }
             throw e;
-        } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            /*
-             * As the UnsupportedCallbackException does not accept the exception as a parameter,
-             * the stack trace is added to the error message.
-             *
-             */
-            log.error("Error in handling PasswordCallbackHandler", e);
-            throw new UnsupportedCallbackException(null, e.getMessage());
         } catch (Exception e) {
-            /*
-             * As the UnsupportedCallbackException does not accept the exception as a parameter,
-             * the stack trace is added to the error message.
-             *
-             */
             log.error("Error in handling PasswordCallbackHandler", e);
             throw new UnsupportedCallbackException(null, e.getMessage());
-        }
-    }
-
-    public Object createObjectWithOptions(String className, RealmConfiguration realmConfig) throws UserStoreException {
-        Class[] initClassOpt1 = new Class[]{RealmConfiguration.class, ClaimManager.class, ProfileConfigurationManager.class};
-        Object[] initObjOpt1 = new Object[]{realmConfig, null, null};
-        try {
-            Class clazz = Class.forName(className);
-            Object newObject = null;
-            if (log.isDebugEnabled()) {
-                log.debug("Start initializing the UserStoreManager class");
-            }
-
-            Constructor constructor;
-            try {
-                constructor = clazz.getConstructor(initClassOpt1);
-                newObject = constructor.newInstance(initObjOpt1);
-                return newObject;
-            } catch (NoSuchMethodException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Cannont initialize " + className);
-                }
-                throw new UserStoreException(e.getMessage(), e);
-            }
-        } catch (Throwable e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Cannot create " + className, e);
-            }
-
-            throw new UserStoreException(e.getMessage() + "Type " + e.getClass(), e);
         }
     }
 
     private boolean authenticateUser(String user, String password) throws Exception {
         boolean isAuthenticated;
         try {
-            isAuthenticated = userStoreManager.authenticate(
-                    user, password);
+            isAuthenticated = userStoreManager.authenticate(user, password);
 
             // TODO - Handle Authorization of users, once they are authenticated
 
